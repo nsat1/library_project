@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>My books</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Название</th>
+            <th>Дата получения</th>
+            <th>Количество дней на руках</th>
+            <th>Действие</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for borrowing in borrowings %}
+        <tr>
+            <td>{{ borrowing.book.title }}</td>
+            <td>{{ borrowing.borrowed_date }}</td>
+            <td>{{ borrowing.days_borrowed }}</td>
+            <td>
+                <a href="{% url 'return_book' borrowing.book.id %}" class="btn btn-primary">Вернуть</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4">У вас нет книг на руках.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
