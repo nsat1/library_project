@@ -56,6 +56,9 @@ def user_logout(request):
 
 @login_required
 def borrow_book(request, book_id):
+    if not request.user.is_reader:
+        return redirect('home')  # или другой URL, куда вы хотите перенаправить нечитателей
+
     book = Book.objects.get(id=book_id)
     reader = Reader.objects.get(user=request.user)
     Borrowing.objects.create(reader=reader, book=book)

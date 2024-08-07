@@ -24,10 +24,14 @@
             <td>{{ book.genre }}</td>
             <td>
                 {% if user.is_authenticated %}
-                    {% if book.is_borrowed %}
-                        <a href="{% url 'return_book' book.id %}" class="btn btn-danger">Return</a>
+                    {% if user.is_reader %}
+                        {% if book.is_borrowed %}
+                            <a href="{% url 'return_book' book.id %}" class="btn btn-danger">Return</a>
+                        {% else %}
+                            <a href="{% url 'borrow_book' book.id %}" class="btn btn-primary">Borrow</a>
+                        {% endif %}
                     {% else %}
-                        <a href="{% url 'borrow_book' book.id %}" class="btn btn-primary">Borrow</a>
+                        <span class="text-muted">Only readers can borrow books</span>
                     {% endif %}
                 {% else %}
                     <a href="{% url 'login' %}" class="btn btn-secondary">Sign In to borrow</a>
