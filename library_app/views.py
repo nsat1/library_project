@@ -6,6 +6,12 @@ from .forms import ReaderRegistrationForm
 from django.utils import timezone
 from django.contrib.auth.decorators import user_passes_test
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from .serializers import BookSerializer, BorrowingSerializer
+
 
 def home(request):
     books = Book.objects.all().order_by('title')
@@ -96,3 +102,79 @@ def librarian_dashboard(request):
     for borrowing in overdue_borrowings:
         borrowing.days_overdue = borrowing.days_borrowed()
     return render(request, 'librarian_dashboard.html', {'overdue_borrowings': overdue_borrowings})
+
+class BookListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        books = Book.objects.all()
+        serializer = BookSerializer(books, many=True)
+        return Response(serializer.data)
+
+class BorrowBookView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, book_id):
+        try:
+            book = Book.objects.get(id=book_id)
+        except Book.DoesNotExist:
+            return Response({'error': 'Book not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if book.is_checked_out:
+            return Response({'error': 'Book is already borrowed'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            reader = Reader.objects.get(user=request.user)
+        except Reader.DoesNotExist:
+            return Response({'error': 'Reader not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        borrowing = Borrowing.objects.create(reader=reader, book=book)
+        book.is_checked_out = True
+        book.save()
+
+        serializer = BorrowingSerializer(borrowing)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+class ReturnBookView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, book_id):
+        try:
+            book = Book.objects.get(id=book_id)
+        except Book.DoesNotExist:
+            return Response({'error': 'Book not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if not book.is_checked_out:
+            return Response({'error': 'Book is not borrowed'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            reader = Reader.objects.get(user=request.user)
+        except Reader.DoesNotExist:
+            return Response({'error': 'Reader not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            borrowing = Borrowing.objects.get(reader=reader, book=book, returned_date__isnull=True)
+        except Borrowing.DoesNotExist:
+            return Response({'error': 'Borrowing record not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        borrowing.returned_date = timezone.now()
+        borrowing.save()
+        book.is_checked_out = False
+        book.save()
+
+        serializer = BorrowingSerializer(borrowing)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class MyBooksView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            reader = Reader.objects.get(user=request.user)
+        except Reader.DoesNotExist:
+            return Response({'error': 'Reader not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        borrowings = Borrowing.objects.filter(reader=reader, returned_date__isnull=True)
+        serializer = BorrowingSerializer(borrowings, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
