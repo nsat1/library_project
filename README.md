@@ -36,34 +36,35 @@
     ```
 
 4. **Настройте параметры PostgreSQL:**
-5. 
-В файле `library_project/settings.py/`
-``
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'your db name',
-        'USER': 'your user name',
-        'PASSWORD': 'your password',
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
-    }
-}
-``
-4. **Примените миграции:**
+
+В файле `library_project/settings.py/`  
+```python
+DATABASES = {  
+    'default': {  
+        'ENGINE': 'django.db.backends.postgresql',  
+        'NAME': 'your db name',  
+        'USER': 'your user name',  
+        'PASSWORD': 'your password',  
+        'HOST': '127.0.0.1',  
+        'PORT': '5432',  
+    }  
+}  
+```
+
+5. **Примените миграции:**
 
     ```bash
     python manage.py makemigrations
     python manage.py migrate
     ```
 
-5. **Создайте суперпользователя:**
+6. **Создайте суперпользователя:**
 
     ```bash
     python manage.py createsuperuser
     ```
 
-6. **Запустите сервер разработки:**
+7. **Запустите сервер разработки:**
 
     ```bash
     python manage.py runserver
@@ -100,9 +101,3 @@ DATABASES = {
 - Просматривать, создавать, изменять и удалять записи о выдаче книг.
 - Фильтровать записи о выдаче книг по тем, кто еще не вернул книгу.
 - Просматривать историю изменений в моделях книг.
-
-
-## Для запуска используйте команду:
-
-```bash
-python manage.py runserver
