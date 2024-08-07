@@ -40,12 +40,22 @@ INSTALLED_APPS = [
     'library_app.apps.LibraryAppConfig',
     'rest_framework',
     'rest_framework_simplejwt',
+    'drf_spectacular',
+    'simple_history',
 ]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Library Project API',
+    'DESCRIPTION': 'Library System',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
 }
 
 AUTH_USER_MODEL = 'library_app.User'

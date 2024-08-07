@@ -12,6 +12,8 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from .serializers import BookSerializer, BorrowingSerializer
 
+from drf_spectacular.utils import extend_schema
+
 
 def home(request):
     books = Book.objects.all().order_by('title')
@@ -103,6 +105,10 @@ def librarian_dashboard(request):
         borrowing.days_overdue = borrowing.days_borrowed()
     return render(request, 'librarian_dashboard.html', {'overdue_borrowings': overdue_borrowings})
 
+@extend_schema(
+    responses=BookSerializer(many=True),
+    description="Get a list of all books."
+)
 class BookListView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -111,6 +117,12 @@ class BookListView(APIView):
         serializer = BookSerializer(books, many=True)
         return Response(serializer.data)
 
+@extend_schema(
+    responses=BorrowingSerializer,
+    description="Borrow a book.",
+    request=None,
+    methods=['POST']
+)
 class BorrowBookView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -135,6 +147,12 @@ class BorrowBookView(APIView):
         serializer = BorrowingSerializer(borrowing)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+@extend_schema(
+    responses=BorrowingSerializer,
+    description="Return a borrowed book.",
+    request=None,
+    methods=['POST']
+)
 class ReturnBookView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -165,6 +183,10 @@ class ReturnBookView(APIView):
         serializer = BorrowingSerializer(borrowing)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+@extend_schema(
+    responses=BorrowingSerializer(many=True),
+    description="Get a list of books currently borrowed by the user."
+)
 class MyBooksView(APIView):
     permission_classes = [IsAuthenticated]
 
