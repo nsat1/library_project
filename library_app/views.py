@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from .models import Book, Borrowing, Reader
 from .forms import ReaderRegistrationForm
 from django.utils import timezone
+from django.contrib.auth.decorators import user_passes_test
 
 
 def home(request):
@@ -76,3 +77,22 @@ def return_book(request, book_id):
     book.is_checked_out = False
     book.save()
     return redirect('home')
+
+def librarian_login(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None and user.is_librarian:
+            login(request, user)
+            return redirect('librarian_dashboard')
+        else:
+            return render(request, 'librarian_login.html', {'error': 'Invalid credentials'})
+    return render(request, 'librarian_login.html')
+
+@user_passes_test(lambda u: u.is_librarian)
+def librarian_dashboard(request):
+    overdue_borrowings = Borrowing.objects.filter(returned_date__isnull=True)
+    for borrowing in overdue_borrowings:
+        borrowing.days_overdue = borrowing.days_borrowed()
+    return render(request, 'librarian_dashboard.html', {'overdue_borrowings': overdue_borrowings})

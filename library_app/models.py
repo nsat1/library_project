@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils import timezone
 
 class User(AbstractUser):
     is_librarian = models.BooleanField(default=False)
@@ -32,3 +33,9 @@ class Borrowing(models.Model):
 
     def is_returned(self):
         return self.returned_date is not None
+
+    def days_borrowed(self):
+        if self.returned_date:
+            return (self.returned_date - self.borrowed_date).days
+        else:
+            return (timezone.now().date() - self.borrowed_date).days
