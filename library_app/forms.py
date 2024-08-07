@@ -1,6 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
+
 from .models import User, Reader
+
 
 class ReaderRegistrationForm(UserCreationForm):
     first_name = forms.CharField(max_length=100, required=True)
@@ -14,6 +16,7 @@ class ReaderRegistrationForm(UserCreationForm):
     def save(self, commit=True):
         user = super().save(commit=False)
         user.is_reader = True
+
         if commit:
             user.save()
             Reader.objects.create(
@@ -22,4 +25,5 @@ class ReaderRegistrationForm(UserCreationForm):
                 last_name=self.cleaned_data['last_name'],
                 address=self.cleaned_data['address']
             )
+
         return user

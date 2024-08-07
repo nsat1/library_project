@@ -5,10 +5,10 @@
 <table class="table table-striped">
     <thead>
         <tr>
-            <th>Название</th>
-            <th>Дата получения</th>
-            <th>Количество дней на руках</th>
-            <th>Действие</th>
+            <th>Book Title</th>
+            <th>Borrowed Date</th>
+            <th>Days Overdue</th>
+            <th>Action</th>
         </tr>
     </thead>
     <tbody>
@@ -23,7 +23,7 @@
         </tr>
         {% empty %}
         <tr>
-            <td colspan="4">У вас нет книг на руках.</td>
+            <td colspan="4">You don't have any books</td>
         </tr>
         {% endfor %}
     </tbody>

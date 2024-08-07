@@ -1,14 +1,18 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
+
 from simple_history.models import HistoricalRecords
+
 
 class User(AbstractUser):
     is_librarian = models.BooleanField(default=False)
     is_reader = models.BooleanField(default=False)
 
     def __str__(self):
+
         return self.username
+
 
 class Librarian(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
@@ -22,7 +26,9 @@ class Reader(models.Model):
     address = models.TextField()
 
     def __str__(self):
+
         return f"{self.first_name} {self.last_name}"
+
 
 class Book(models.Model):
     title = models.CharField(max_length=50)
@@ -32,7 +38,9 @@ class Book(models.Model):
     history = HistoricalRecords()
 
     def __str__(self):
+
         return self.title
+
 
 class Borrowing(models.Model):
     reader = models.ForeignKey(Reader, on_delete=models.CASCADE)
@@ -41,15 +49,18 @@ class Borrowing(models.Model):
     returned_date = models.DateField(null=True, blank=True)
 
     def is_returned(self):
+
         return self.returned_date is not None
 
     def days_borrowed(self):
+
         if self.returned_date:
+
             return (self.returned_date - self.borrowed_date).days
         else:
+
             return (timezone.now().date() - self.borrowed_date).days
 
     def __str__(self):
+
         return f"{self.reader} borrowed {self.book} on {self.borrowed_date}"
-
-
